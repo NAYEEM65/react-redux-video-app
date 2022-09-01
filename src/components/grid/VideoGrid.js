@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchPaginateVideos } from '../../features/pagination/paginationSlice';
 import { fetchVideos } from '../../features/videos/videosSlice';
 import Loading from '../ui/Loading';
 import VideoGridItem from './VideoGridItem';
 
 export default function VideGrid() {
     const dispatch = useDispatch();
-    const { videos, isLoading, isError, error } = useSelector((state) => state.videos);
+    const { isLoading, isError, error } = useSelector((state) => state.videos);
     const { tags, search, author } = useSelector((state) => state.filter);
+    const { paginateVideos } = useSelector((state) => state.paginatedVideos);
+    console.log(paginateVideos);
 
     useEffect(() => {
         dispatch(fetchVideos({ tags, search, author }));
+        dispatch(fetchPaginateVideos(5));
     }, [dispatch, tags, search, author]);
 
     // decide what to render
@@ -19,12 +23,12 @@ export default function VideGrid() {
     if (isLoading) content = <Loading />;
     if (!isLoading && isError) content = <div className="col-span-12">{error}</div>;
 
-    if (!isError && !isLoading && videos?.length === 0) {
+    if (!isError && !isLoading && paginateVideos?.length === 0) {
         content = <div className="col-span-12">No videos found!</div>;
     }
 
-    if (!isError && !isLoading && videos?.length > 0) {
-        content = videos.map((video) => <VideoGridItem key={video.id} video={video} />);
+    if (!isError && !isLoading && paginateVideos?.length > 0) {
+        content = paginateVideos.map((video) => <VideoGridItem key={video.id} video={video} />);
     }
 
     return (

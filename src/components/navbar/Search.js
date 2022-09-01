@@ -19,7 +19,6 @@ export default function Search() {
         if (!match) {
             navigate('/');
         }
-        setInput('');
     };
 
     return (

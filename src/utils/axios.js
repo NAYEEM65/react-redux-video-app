@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:9000",
+    baseURL: 'https://own-data-server.herokuapp.com/',
 });
 
 export default axiosInstance;

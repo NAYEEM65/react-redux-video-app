@@ -12,8 +12,8 @@ const initialState = {
 // async thunk
 export const fetchVideos = createAsyncThunk(
     'videos/fetchVideos',
-    async ({ tags, search, author }) => {
-        const videos = await getVideos(tags, search, author);
+    async ({ tags, search, author, start, end }) => {
+        const videos = await getVideos(tags, search, author, start, end);
         return videos;
     },
 );
@@ -38,17 +38,6 @@ const videoSlice = createSlice({
                 state.error = action.error?.message;
             });
     },
-    // reducers: {
-    //     likeCount: (state = initialState, action) => {
-    //         const response = axios.put(`http://localhost:9000/videos/${action.payload}`);
-    //         const video = response.json();
-    //         console.log(video);
-    //     },
-    //     disLikeCount: (state, action) => {
-    //         state.unlikes = state.unlikes + 1;
-    //     },
-    // },
 });
 
 export default videoSlice.reducer;
-export const { likeCount, disLikeCount } = videoSlice.actions;

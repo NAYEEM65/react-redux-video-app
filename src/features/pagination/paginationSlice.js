@@ -1,40 +1,59 @@
-import { getVideoPagination } from './videosAPI';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { getTotalVideos } from './paginationAPI';
 
-const { createSlice, createAsyncThunk } = require('@reduxjs/toolkit');
-
-const initialState = {
-    paginateVideos: [],
+let initialState = {
+    totalVideos: 0,
+    itemsPerPage: 4,
+    start: 0,
+    end: 4,
+    pageNumber: 1,
     isLoading: false,
     isError: false,
     error: '',
 };
 
-// async thunk
-export const fetchPaginateVideos = createAsyncThunk('videos/fetchPaginateVideos', async (limit) => {
-    const paginateVideos = await getVideoPagination(limit);
-    return paginateVideos;
-});
-
-const paginateVideoSlice = createSlice({
-    name: 'paginateVideos',
+// thunk function
+export const fetchTotalVideos = createAsyncThunk(
+    'pagination/fetchTotalVideos',
+    async ({ tags, search, author }) => {
+        const totalVideos = await getTotalVideos(tags, search, author);
+        return totalVideos;
+    },
+);
+const paginationSlice = createSlice({
+    name: 'pagination',
     initialState,
+    reducers: {
+        paginate: (state, action) => {
+            state.pageNumber = action.payload;
+            state.start = (action.payload - 1) * state.itemsPerPage;
+            let end = state.itemsPerPage * action.payload;
+            state.end = end > state.totalVideos ? state.totalVideos : end;
+        },
+        resetPage: (state) => {
+            state.start = 0;
+            state.end = state.itemsPerPage;
+            state.pageNumber = 1;
+        },
+    },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchPaginateVideos.pending, (state) => {
+            .addCase(fetchTotalVideos.pending, (state, action) => {
                 state.isError = false;
                 state.isLoading = true;
             })
-            .addCase(fetchPaginateVideos.fulfilled, (state, action) => {
+            .addCase(fetchTotalVideos.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.paginateVideos = action.payload;
+                state.totalVideos = action.payload;
             })
-            .addCase(fetchPaginateVideos.rejected, (state, action) => {
+            .addCase(fetchTotalVideos.rejected, (state, action) => {
                 state.isLoading = false;
-                state.paginateVideos = [];
+                state.totalVideos = [];
                 state.isError = true;
                 state.error = action.error?.message;
             });
     },
 });
 
-export default paginateVideoSlice.reducer;
+export default paginationSlice.reducer;
+export const { paginate, resetPage } = paginationSlice.actions;
